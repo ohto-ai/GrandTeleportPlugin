@@ -18,6 +18,9 @@ permissions:
   grandteleport.use:
     description: "Players who get cinematic teleport effects"
     default: true
+  grandteleport.self:
+    description: "Allow toggling own effects on/off via /gtp toggle"
+    default: true
   grandteleport.admin:
     description: "Access to /grandtp admin commands and test commands"
     default: op

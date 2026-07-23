@@ -132,22 +132,40 @@ public class GtpCommand implements CommandExecutor {
     }
 
     private void handleToggle(CommandSender sender, String[] args) {
-        if (!checkAdmin(sender)) return;
-        if (args.length < 2) {
-            sender.sendMessage(Component.text("Usage: /gtp toggle <player>", NamedTextColor.RED));
+        // Self-toggle: /gtp toggle (no player name needed)
+        if (args.length < 2 && sender instanceof Player self) {
+            if (!self.hasPermission("grandteleport.self")) {
+                sender.sendMessage(Component.text("No permission.", NamedTextColor.RED));
+                return;
+            }
+            boolean current = plugin.isEffectEnabled(self);
+            plugin.setPlayerEnabled(self, !current);
+            sender.sendMessage(Component.text("Your teleport effects: ", NamedTextColor.GRAY)
+                    .append((!current)
+                            ? Component.text("ENABLED", NamedTextColor.GREEN)
+                            : Component.text("DISABLED", NamedTextColor.RED)));
             return;
         }
-        Player target = Bukkit.getPlayer(args[1]);
-        if (target == null) {
-            sender.sendMessage(Component.text("Player not found: " + args[1], NamedTextColor.RED));
+
+        // Toggle another player (admin only)
+        if (args.length >= 2) {
+            if (!checkAdmin(sender)) return;
+            Player target = Bukkit.getPlayer(args[1]);
+            if (target == null) {
+                sender.sendMessage(Component.text("Player not found: " + args[1], NamedTextColor.RED));
+                return;
+            }
+            boolean current = plugin.isEffectEnabled(target);
+            plugin.setPlayerEnabled(target, !current);
+            sender.sendMessage(Component.text(target.getName() + " effects: ", NamedTextColor.GRAY)
+                    .append((!current)
+                            ? Component.text("ENABLED", NamedTextColor.GREEN)
+                            : Component.text("DISABLED", NamedTextColor.RED)));
             return;
         }
-        boolean current = plugin.isEffectEnabled(target);
-        plugin.setPlayerEnabled(target, !current);
-        sender.sendMessage(Component.text(target.getName() + " effects: ", NamedTextColor.GRAY)
-                .append((!current)
-                        ? Component.text("ENABLED", NamedTextColor.GREEN)
-                        : Component.text("DISABLED", NamedTextColor.RED)));
+
+        sender.sendMessage(Component.text("Usage: /gtp toggle — toggle yourself", NamedTextColor.GRAY));
+        sender.sendMessage(Component.text("Usage: /gtp toggle <player> — toggle another (admin)", NamedTextColor.GRAY));
     }
 
     private void handleClear(CommandSender sender, String[] args) {
@@ -221,10 +239,12 @@ public class GtpCommand implements CommandExecutor {
                 .append(Component.text(" — Show status", NamedTextColor.GRAY)));
         sender.sendMessage(Component.text("/gtp reload", NamedTextColor.YELLOW)
                 .append(Component.text(" — Reload config", NamedTextColor.GRAY)));
+        sender.sendMessage(Component.text("/gtp toggle", NamedTextColor.YELLOW)
+                .append(Component.text(" — Toggle your own effects", NamedTextColor.GRAY)));
         sender.sendMessage(Component.text("/gtp toggle <player>", NamedTextColor.YELLOW)
-                .append(Component.text(" — Toggle per-player", NamedTextColor.GRAY)));
+                .append(Component.text(" — Toggle another (admin)", NamedTextColor.GRAY)));
         sender.sendMessage(Component.text("/gtp clear <player>", NamedTextColor.YELLOW)
-                .append(Component.text(" — Reset to default", NamedTextColor.GRAY)));
+                .append(Component.text(" — Reset to default (admin)", NamedTextColor.GRAY)));
         sender.sendMessage(Component.text("/gtp test mod <cmd>", NamedTextColor.YELLOW)
                 .append(Component.text(" — Test transition", NamedTextColor.GRAY)));
     }
