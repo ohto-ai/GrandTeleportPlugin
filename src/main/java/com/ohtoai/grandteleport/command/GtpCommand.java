@@ -107,8 +107,7 @@ public class GtpCommand implements CommandExecutor {
 
     /**
      * Test commands:
-     *   /gtp test mod <cmd>      — Force camera transition via ModCameraBridge
-     *   /gtp test passthrough <cmd> — Passthrough type (effect wrapper, re-dispatch)
+     *   /gtp test mod <cmd> — Force camera transition with given tp command
      */
     private void handleTest(CommandSender sender, String[] args) {
         if (!sender.hasPermission("grandteleport.admin")) {
@@ -120,75 +119,50 @@ public class GtpCommand implements CommandExecutor {
             return;
         }
         if (args.length < 3) {
-            sender.sendMessage(Component.text("Usage: /gtp test <mod|passthrough> <command>", NamedTextColor.RED));
-            sender.sendMessage(Component.text("  mod      — Camera transition via client mod", NamedTextColor.GRAY));
-            sender.sendMessage(Component.text("  passthrough — Effect wrapper, re-dispatch command", NamedTextColor.GRAY));
+            sender.sendMessage(Component.text("Usage: /gtp test mod <tp command>", NamedTextColor.RED));
             sender.sendMessage(Component.text("Example: /gtp test mod tp 100 64 200", NamedTextColor.GRAY));
             return;
         }
 
         String mode = args[1].toLowerCase();
-        String tpCommand = String.join(" ", java.util.Arrays.copyOfRange(args, 2, args.length));
-        if (!tpCommand.startsWith("/")) {
-            tpCommand = "/" + tpCommand;
+        if (!"mod".equals(mode)) {
+            sender.sendMessage(Component.text("Unknown mode: " + mode + ". Use 'mod'.", NamedTextColor.RED));
+            return;
         }
+
+        String tpCommand = String.join(" ", java.util.Arrays.copyOfRange(args, 2, args.length));
+        if (!tpCommand.startsWith("/")) tpCommand = "/" + tpCommand;
 
         TransitionSettings settings = plugin.getTransitionSettings();
         if (!settings.enabled) {
-            sender.sendMessage(Component.text("Effects are currently disabled. Use /gtp on first.", NamedTextColor.RED));
+            sender.sendMessage(Component.text("Effects are disabled. Use /gtp on first.", NamedTextColor.RED));
             return;
         }
-
         if (plugin.isInTransition(player)) {
-            sender.sendMessage(Component.text("You are already in a transition!", NamedTextColor.RED));
+            sender.sendMessage(Component.text("Already in a transition!", NamedTextColor.RED));
             return;
         }
 
-        switch (mode) {
-            case "mod" -> {
-                Location source = player.getLocation();
-                Location target = DestinationParser.parse(tpCommand, player);
+        Location source = player.getLocation();
+        Location target = DestinationParser.parse(tpCommand, player);
 
-                if (target == null) {
-                    sender.sendMessage(Component.text(
-                            "Could not parse coordinates from: " + tpCommand
-                            + "\nMake sure the command contains x y z coordinates.",
-                            NamedTextColor.RED));
-                    return;
-                }
-
-                sender.sendMessage(Component.text(
-                        "[MOD] Starting camera transition to " + formatLoc(target) + "...",
-                        NamedTextColor.AQUA));
-
-                plugin.startTransition(player);
-                if (settings.freezeEnabled) plugin.freezePlayer(player);
-
-                com.ohtoai.grandteleport.teleport.ModCameraBridge modBridge =
-                        new com.ohtoai.grandteleport.teleport.ModCameraBridge(plugin);
-                modBridge.start(player, source, target, tpCommand, settings);
-            }
-            case "passthrough" -> {
-                sender.sendMessage(Component.text(
-                        "[PASSTHROUGH] Starting effect wrapper for: " + tpCommand,
-                        NamedTextColor.YELLOW));
-
-                plugin.startTransition(player);
-                if (settings.freezeEnabled) plugin.freezePlayer(player);
-
-                String cleanCmd = tpCommand.startsWith("/") ? tpCommand.substring(1) : tpCommand;
-
-                plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
-                    plugin.unfreezePlayer(player);
-                    plugin.endTransition(player);
-                    plugin.setBypassNextCommand(player);
-                    plugin.getServer().dispatchCommand(player, cleanCmd);
-                }, settings.passthroughDelayTicks);
-            }
-            default -> sender.sendMessage(Component.text(
-                    "Unknown test mode: " + mode + ". Use 'mod' or 'passthrough'.",
+        if (target == null) {
+            sender.sendMessage(Component.text(
+                    "Could not parse coordinates from: " + tpCommand
+                    + "\nMake sure the command contains x y z coordinates.",
                     NamedTextColor.RED));
+            return;
         }
+
+        sender.sendMessage(Component.text(
+                "[MOD] Camera transition to " + formatLoc(target) + "...",
+                NamedTextColor.AQUA));
+
+        plugin.startTransition(player);
+        if (settings.freezeEnabled) plugin.freezePlayer(player);
+
+        new com.ohtoai.grandteleport.teleport.ModCameraBridge(plugin)
+                .start(player, source, target, tpCommand, settings);
     }
 
     private void sendUsage(CommandSender sender) {
@@ -203,8 +177,6 @@ public class GtpCommand implements CommandExecutor {
                 .append(Component.text(" — Reload config", NamedTextColor.GRAY)));
         sender.sendMessage(Component.text("/gtp test mod <command>", NamedTextColor.YELLOW)
                 .append(Component.text(" — Test camera transition", NamedTextColor.GRAY)));
-        sender.sendMessage(Component.text("/gtp test passthrough <command>", NamedTextColor.YELLOW)
-                .append(Component.text(" — Test passthrough mode", NamedTextColor.GRAY)));
     }
 
     private String formatLoc(Location loc) {

@@ -18,9 +18,7 @@ public class GtpTabCompleter implements TabCompleter {
             "on", "off", "status", "reload", "test"
     );
 
-    private static final List<String> TEST_MODES = List.of(
-            "mod", "passthrough"
-    );
+    private static final List<String> TEST_MODES = List.of("mod");
 
     private static final List<String> EMPTY = List.of();
 

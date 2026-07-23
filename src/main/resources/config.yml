@@ -28,34 +28,9 @@ commands:
     type: coordinates
     enabled: true
 
-  # --- Passthrough type: effect wrapper → dispatch to target plugin ---
-  - pattern: "^/(?:essentials:)?tpa(?:ccept|deny|here|ll)?\\b.*"
-    type: passthrough
-    enabled: true
-  - pattern: "^/tpask\\b.*"
-    type: passthrough
-    enabled: true
-  - pattern: "^/tpayes\\b.*"
-    type: passthrough
-    enabled: true
-  - pattern: "^/tpano\\b.*"
-    type: passthrough
-    enabled: true
-  - pattern: "^/res\\s+tp\\s+.*"
-    type: passthrough
-    enabled: true
-  - pattern: "^/warp\\s+.*"
-    type: passthrough
-    enabled: true
-  - pattern: "^/home\\s*.*"
-    type: passthrough
-    enabled: true
-  - pattern: "^/spawn\\s*.*"
-    type: passthrough
-    enabled: true
-  - pattern: "^/back\\s*.*"
-    type: passthrough
-    enabled: true
+  # Note: TPA, warp, home, spawn, back, res tp, and other plugin teleports
+  # are handled automatically via global PlayerTeleportEvent listener.
+  # No command patterns needed for them — any teleport on a mod client gets animated.
 
 # ----------------------------------------------------------------------------
 # Camera animation parameters (shared by mod and armor-stand fallback)

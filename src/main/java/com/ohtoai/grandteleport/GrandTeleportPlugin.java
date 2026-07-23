@@ -8,6 +8,7 @@ import com.ohtoai.grandteleport.listener.ModHandshakeListener;
 import com.ohtoai.grandteleport.listener.PlayerFreezeListener;
 import com.ohtoai.grandteleport.network.CameraPackets;
 import com.ohtoai.grandteleport.teleport.CommandInterceptor;
+import com.ohtoai.grandteleport.teleport.ModTeleportListener;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.messaging.PluginMessageListener;
@@ -74,10 +75,14 @@ public final class GrandTeleportPlugin extends JavaPlugin implements PluginMessa
             }
         }
 
-        // 3. Initialize command interceptor
+        // 3. Initialize command interceptor (coordinates type only)
         commandInterceptor = new CommandInterceptor(this);
         getServer().getPluginManager().registerEvents(commandInterceptor, this);
         getLogger().info("Command interceptor registered.");
+
+        // 3b. Register global teleport listener (TPA, warp, home, spawn, back, etc.)
+        getServer().getPluginManager().registerEvents(new ModTeleportListener(this), this);
+        getLogger().info("Mod teleport listener registered.");
 
         // 4. Register freeze listener
         getServer().getPluginManager().registerEvents(new PlayerFreezeListener(this), this);
