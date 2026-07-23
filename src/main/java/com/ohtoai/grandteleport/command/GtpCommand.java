@@ -45,6 +45,7 @@ public class GtpCommand implements CommandExecutor {
         switch (sub) {
             case "on" -> handleOn(sender);
             case "off" -> handleOff(sender);
+            case "default" -> handleDefault(sender, args);
             case "status" -> handleStatus(sender, args);
             case "reload" -> handleReload(sender);
             case "toggle" -> handleToggle(sender, args);
@@ -67,6 +68,20 @@ public class GtpCommand implements CommandExecutor {
         plugin.getConfigManager().getConfig().set("enabled", false);
         plugin.getConfigManager().save();
         sender.sendMessage(Component.text("GrandTeleport effects globally DISABLED.", NamedTextColor.RED));
+    }
+
+    private void handleDefault(CommandSender sender, String[] args) {
+        if (!checkAdmin(sender)) return;
+        if (args.length < 2 || (!"on".equalsIgnoreCase(args[1]) && !"off".equalsIgnoreCase(args[1]))) {
+            sender.sendMessage(Component.text("Usage: /gtp default <on|off>", NamedTextColor.RED));
+            return;
+        }
+        boolean val = "on".equalsIgnoreCase(args[1]);
+        plugin.getConfigManager().getConfig().set("default_enabled", val);
+        plugin.getConfigManager().save();
+        sender.sendMessage(Component.text("Default for new players set to ", NamedTextColor.GRAY)
+                .append(val ? Component.text("ENABLED", NamedTextColor.GREEN)
+                        : Component.text("DISABLED", NamedTextColor.RED)));
     }
 
     private void handleStatus(CommandSender sender, String[] args) {
@@ -196,6 +211,8 @@ public class GtpCommand implements CommandExecutor {
                 .append(Component.text(" — Global enable", NamedTextColor.GRAY)));
         sender.sendMessage(Component.text("/gtp off", NamedTextColor.YELLOW)
                 .append(Component.text(" — Global disable", NamedTextColor.GRAY)));
+        sender.sendMessage(Component.text("/gtp default <on|off>", NamedTextColor.YELLOW)
+                .append(Component.text(" — Set default for new players", NamedTextColor.GRAY)));
         sender.sendMessage(Component.text("/gtp status [player]", NamedTextColor.YELLOW)
                 .append(Component.text(" — Show status", NamedTextColor.GRAY)));
         sender.sendMessage(Component.text("/gtp reload", NamedTextColor.YELLOW)
