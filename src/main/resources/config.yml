@@ -37,6 +37,14 @@ commands:
   # No command patterns needed for them — any teleport on a mod client gets animated.
 
 # ----------------------------------------------------------------------------
+# Vanilla fallback for players WITHOUT the client mod
+# When enabled, non-mod players see a direct-teleport chain animation (less smooth
+# than the mod, but better than nothing). The camera pitch is forced to 90° (top-down).
+# ----------------------------------------------------------------------------
+fallback:
+  enabled: false
+
+# ----------------------------------------------------------------------------
 # Camera animation parameters (shared by mod and armor-stand fallback)
 # ----------------------------------------------------------------------------
 camera:

@@ -103,6 +103,10 @@ public class GtpCommand implements CommandExecutor {
                 .append(Component.text(modCount, NamedTextColor.WHITE)));
         sender.sendMessage(Component.text("Active transitions: ", NamedTextColor.GRAY)
                 .append(Component.text(active, NamedTextColor.WHITE)));
+        boolean fallback = plugin.getConfigManager().getConfig().getBoolean("fallback.enabled", false);
+        sender.sendMessage(Component.text("Vanilla fallback: ", NamedTextColor.GRAY)
+                .append(fallback ? Component.text("ENABLED", NamedTextColor.GREEN)
+                        : Component.text("DISABLED", NamedTextColor.RED)));
 
         // If player specified, show their personal status
         if (args.length >= 2) {

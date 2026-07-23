@@ -32,6 +32,10 @@ public class CommandInterceptor implements Listener {
         loadPatterns();
     }
 
+    private boolean isFallbackEnabled() {
+        return plugin.getConfigManager().getConfig().getBoolean("fallback.enabled", false);
+    }
+
     public void loadPatterns() {
         commandPatterns.clear();
         List<Map<?, ?>> commands = plugin.getConfigManager().getConfig().getMapList("commands");
@@ -88,7 +92,17 @@ public class CommandInterceptor implements Listener {
     }
 
     private void handleCoordinates(Player player, String command, TransitionSettings settings) {
-        if (!settings.modEnabled || !plugin.hasMod(player)) {
+        // No mod — check fallback
+        if (!plugin.hasMod(player)) {
+            if (isFallbackEnabled()) {
+                Location src = player.getLocation();
+                Location dst = DestinationParser.parse(command, player);
+                if (dst != null && plugin.startTransition(player)) {
+                    if (settings.freezeEnabled) plugin.freezePlayer(player);
+                    new VanillaCameraAnimation(plugin).start(player, src, dst, settings);
+                    return;
+                }
+            }
             plugin.setBypassNextCommand(player);
             plugin.getServer().dispatchCommand(player,
                     command.startsWith("/") ? command.substring(1) : command);

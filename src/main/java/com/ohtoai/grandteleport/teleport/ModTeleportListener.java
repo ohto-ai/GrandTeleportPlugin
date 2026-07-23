@@ -25,12 +25,27 @@ public class ModTeleportListener implements Listener {
         this.plugin = plugin;
     }
 
+    private boolean isFallbackEnabled() {
+        return plugin.getConfigManager().getConfig().getBoolean("fallback.enabled", false);
+    }
+
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerTeleport(PlayerTeleportEvent event) {
         Player player = event.getPlayer();
+        Location to = event.getTo();
+        if (to == null) return;
+        Location from = event.getFrom();
+        TransitionSettings settings = plugin.getTransitionSettings();
 
-        // Only handle mod-enabled players
-        if (!plugin.hasMod(player)) return;
+        // No mod — check fallback
+        if (!plugin.hasMod(player)) {
+            if (isFallbackEnabled() && plugin.startTransition(player)) {
+                event.setCancelled(true);
+                if (settings.freezeEnabled) plugin.freezePlayer(player);
+                new VanillaCameraAnimation(plugin).start(player, from, to, settings);
+            }
+            return;
+        }
 
         // Don't interfere if already in a transition (handled by CommandInterceptor)
         if (plugin.isInTransition(player)) return;
@@ -38,21 +53,10 @@ public class ModTeleportListener implements Listener {
         // Don't interfere with bypass
         if (plugin.shouldBypassNextCommand(player)) return;
 
-        TransitionSettings settings = plugin.getTransitionSettings();
         if (!settings.enabled || !settings.modEnabled) return;
         if (!plugin.isEffectEnabled(player)) return;
+        if (from.getWorld() == to.getWorld() && from.distanceSquared(to) < 1.0) return;
 
-        Location to = event.getTo();
-        if (to == null) return;
-
-        // Only handle significant teleports (skip micro-adjustments)
-        Location from = event.getFrom();
-        if (from != null && from.getWorld() == to.getWorld()
-                && from.distanceSquared(to) < 1.0) {
-            return; // tiny movement, not a real teleport
-        }
-
-        // Cancel the teleport — we'll animate first
         event.setCancelled(true);
 
         if (!plugin.startTransition(player)) return;
