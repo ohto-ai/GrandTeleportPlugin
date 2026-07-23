@@ -10,6 +10,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 
 import java.util.List;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
@@ -26,6 +28,7 @@ public class CommandInterceptor implements Listener {
 
     private final GrandTeleportPlugin plugin;
     private final Map<Pattern, String> commandPatterns = new ConcurrentHashMap<>();
+    private final List<Pattern> skipPatterns = new ArrayList<>();
 
     public CommandInterceptor(GrandTeleportPlugin plugin) {
         this.plugin = plugin;
@@ -63,12 +66,35 @@ public class CommandInterceptor implements Listener {
         }
 
         plugin.getLogger().info("Loaded " + commandPatterns.size() + " coordinates command patterns.");
+
+        // Load skip patterns
+        skipPatterns.clear();
+        List<String> skips = plugin.getConfigManager().getConfig().getStringList("skip_patterns");
+        if (skips != null) {
+            for (String patternStr : skips) {
+                try {
+                    skipPatterns.add(Pattern.compile(patternStr, Pattern.CASE_INSENSITIVE));
+                    plugin.getLogger().info("Loaded skip pattern: " + patternStr);
+                } catch (PatternSyntaxException e) {
+                    plugin.getLogger().log(Level.WARNING, "Invalid skip pattern: " + patternStr, e);
+                }
+            }
+        }
+        plugin.getLogger().info("Loaded " + skipPatterns.size() + " skip patterns.");
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {
         Player player = event.getPlayer();
         String command = event.getMessage();
+
+        // Check skip patterns first — these commands bypass ALL effects
+        for (Pattern skip : skipPatterns) {
+            if (skip.matcher(command).matches()) {
+                plugin.getLogger().fine("Skip pattern matched: " + command);
+                return; // let it pass through normally
+            }
+        }
 
         if (plugin.shouldBypassNextCommand(player)) return;
         if (player.hasPermission("grandteleport.bypass")) return;

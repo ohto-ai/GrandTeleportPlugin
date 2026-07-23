@@ -36,6 +36,14 @@ commands:
   # are handled automatically via global PlayerTeleportEvent listener.
   # No command patterns needed for them — any teleport on a mod client gets animated.
 
+# Commands that should NOT trigger camera effects (prefix/regex match)
+# Players who find certain commands annoying to wait for can disable them here.
+# The command passes through instantly with no animation.
+skip_patterns:
+#  - "^/back"       # Example: disable camera for /back
+#  - "^/spawn"      # Example: disable camera for /spawn
+#  - "^/warp shop"  # Example: disable camera for /warp shop specifically
+
 # ----------------------------------------------------------------------------
 # Vanilla fallback for players WITHOUT the client mod
 # When enabled, non-mod players see a direct-teleport chain animation (less smooth
