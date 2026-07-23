@@ -28,7 +28,8 @@ public class CommandInterceptor implements Listener {
 
     private final GrandTeleportPlugin plugin;
     private final Map<Pattern, String> commandPatterns = new ConcurrentHashMap<>();
-    private final List<Pattern> skipPatterns = new ArrayList<>();
+    private final List<Pattern> filterPatterns = new ArrayList<>();
+    private volatile String filterMode = "blacklist";
 
     public CommandInterceptor(GrandTeleportPlugin plugin) {
         this.plugin = plugin;
@@ -67,20 +68,23 @@ public class CommandInterceptor implements Listener {
 
         plugin.getLogger().info("Loaded " + commandPatterns.size() + " coordinates command patterns.");
 
-        // Load skip patterns
-        skipPatterns.clear();
-        List<String> skips = plugin.getConfigManager().getConfig().getStringList("skip_patterns");
-        if (skips != null) {
-            for (String patternStr : skips) {
-                try {
-                    skipPatterns.add(Pattern.compile(patternStr, Pattern.CASE_INSENSITIVE));
-                    plugin.getLogger().info("Loaded skip pattern: " + patternStr);
-                } catch (PatternSyntaxException e) {
-                    plugin.getLogger().log(Level.WARNING, "Invalid skip pattern: " + patternStr, e);
+        // Load filter patterns
+        filterPatterns.clear();
+        filterMode = plugin.getConfigManager().getConfig().getString("filter_mode", "blacklist");
+        if (!"none".equals(filterMode)) {
+            List<String> filters = plugin.getConfigManager().getConfig().getStringList("filter_patterns");
+            if (filters != null) {
+                for (String patternStr : filters) {
+                    try {
+                        filterPatterns.add(Pattern.compile(patternStr, Pattern.CASE_INSENSITIVE));
+                        plugin.getLogger().info("Loaded filter pattern: " + patternStr);
+                    } catch (PatternSyntaxException e) {
+                        plugin.getLogger().log(Level.WARNING, "Invalid filter pattern: " + patternStr, e);
+                    }
                 }
             }
         }
-        plugin.getLogger().info("Loaded " + skipPatterns.size() + " skip patterns.");
+        plugin.getLogger().info("Filter mode: " + filterMode + " (" + filterPatterns.size() + " patterns)");
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -88,12 +92,14 @@ public class CommandInterceptor implements Listener {
         Player player = event.getPlayer();
         String command = event.getMessage();
 
-        // Check skip patterns first — these commands bypass ALL effects
-        for (Pattern skip : skipPatterns) {
-            if (skip.matcher(command).matches()) {
-                plugin.getLogger().fine("Skip pattern matched: " + command);
-                return; // let it pass through normally
+        // Check filter patterns
+        if (!filterPatterns.isEmpty() && !"none".equals(filterMode)) {
+            boolean matched = false;
+            for (Pattern p : filterPatterns) {
+                if (p.matcher(command).matches()) { matched = true; break; }
             }
+            if ("blacklist".equals(filterMode) && matched) return;  // skip this command
+            if ("whitelist".equals(filterMode) && !matched) return; // only allow matched commands
         }
 
         if (plugin.shouldBypassNextCommand(player)) return;
