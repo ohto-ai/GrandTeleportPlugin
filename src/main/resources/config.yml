@@ -5,6 +5,10 @@
 # Master enable/disable switch for all teleport effects
 enabled: true
 
+# Default value for players without a personal setting
+# Players can be individually toggled with /gtp toggle <player>
+default_enabled: true
+
 # ----------------------------------------------------------------------------
 # Client Mod settings
 # ----------------------------------------------------------------------------

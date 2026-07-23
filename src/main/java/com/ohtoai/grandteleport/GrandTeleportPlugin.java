@@ -14,6 +14,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.messaging.PluginMessageListener;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
@@ -38,6 +39,9 @@ public final class GrandTeleportPlugin extends JavaPlugin implements PluginMessa
 
     // Bypass flag — set before re-dispatching a command to avoid double interception
     private final Set<UUID> bypassNextCommand = ConcurrentHashMap.newKeySet();
+
+    // Per-player enabled state — null = use default
+    private final Map<UUID, Boolean> playerEnabledOverrides = new ConcurrentHashMap<>();
 
     public static GrandTeleportPlugin getInstance() {
         return instance;
@@ -186,6 +190,37 @@ public final class GrandTeleportPlugin extends JavaPlugin implements PluginMessa
 
     public void setBypassNextCommand(Player player) {
         bypassNextCommand.add(player.getUniqueId());
+    }
+
+    // --- Per-player enabled state ---
+
+    /**
+     * Check if effects should be active for a player.
+     * Returns the player's personal override if set, otherwise the global default.
+     */
+    public boolean isEffectEnabled(Player player) {
+        Boolean override = playerEnabledOverrides.get(player.getUniqueId());
+        if (override != null) return override;
+        return configManager != null
+                && configManager.getConfig().getBoolean("default_enabled", true);
+    }
+
+    /**
+     * Set a player's personal override. null = remove override (use default).
+     */
+    public void setPlayerEnabled(Player player, Boolean enabled) {
+        if (enabled == null) {
+            playerEnabledOverrides.remove(player.getUniqueId());
+        } else {
+            playerEnabledOverrides.put(player.getUniqueId(), enabled);
+        }
+    }
+
+    /**
+     * Get the player's personal override status, or null if using default.
+     */
+    public Boolean getPlayerOverride(Player player) {
+        return playerEnabledOverrides.get(player.getUniqueId());
     }
 
     // --- Freeze tracking ---

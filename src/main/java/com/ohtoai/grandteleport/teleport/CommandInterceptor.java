@@ -72,6 +72,7 @@ public class CommandInterceptor implements Listener {
 
         TransitionSettings settings = plugin.getTransitionSettings();
         if (!settings.enabled) return;
+        if (!plugin.isEffectEnabled(player)) return;
         if (plugin.isInTransition(player)) return;
 
         String lowerCmd = command.toLowerCase().stripLeading();

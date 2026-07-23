@@ -40,6 +40,7 @@ public class ModTeleportListener implements Listener {
 
         TransitionSettings settings = plugin.getTransitionSettings();
         if (!settings.enabled || !settings.modEnabled) return;
+        if (!plugin.isEffectEnabled(player)) return;
 
         Location to = event.getTo();
         if (to == null) return;
