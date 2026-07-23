@@ -1,0 +1,32 @@
+name: GrandTeleportPlugin
+version: ${version}
+main: com.ohtoai.grandteleport.GrandTeleportPlugin
+api-version: "1.20"
+description: ${description}
+author: OhtoAi
+website: https://github.com/ohto-ai/GrandTeleportPlugin
+
+# Each sub-channel must be declared for plugin messaging to work
+# These match the channel IDs in CameraPackets.java
+plugin-messaging-channels:
+  - "grandteleport:camera_start"
+  - "grandteleport:camera_ready"
+  - "grandteleport:client_hello"
+  - "grandteleport:server_hello"
+
+permissions:
+  grandteleport.use:
+    description: "Players who get cinematic teleport effects"
+    default: true
+  grandteleport.admin:
+    description: "Access to /grandtp admin commands and test commands"
+    default: op
+  grandteleport.bypass:
+    description: "Skip all cinematic effects"
+    default: false
+
+commands:
+  grandtp:
+    description: "GrandTeleport admin command"
+    usage: "/grandtp <on|off|status|reload|toggle|test>"
+    aliases: [gtp]

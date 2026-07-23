@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "grandteleportclient",
+  "version": "${version}",
+  "name": "Grand Teleport Client",
+  "description": "Companion client mod for GrandTeleportPlugin. Receives camera transition packets from the server plugin and renders cinematic teleport animations.",
+  "authors": ["OhtoAi"],
+  "contact": {
+    "homepage": "https://github.com/ohto-ai/GrandTeleportPlugin",
+    "sources": "https://github.com/ohto-ai/GrandTeleportPlugin"
+  },
+  "license": "MIT",
+  "icon": "assets/grandteleportclient/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "dev.ohtoai.grandteleportclient.GrandTeleportClient"
+    ]
+  },
+  "mixins": [
+    "grandteleportclient.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.15.11",
+    "fabric-api": "*",
+    "minecraft": ">=1.20.5"
+  }
+}

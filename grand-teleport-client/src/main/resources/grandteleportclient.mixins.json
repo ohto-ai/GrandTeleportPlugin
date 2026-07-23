@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "package": "dev.ohtoai.grandteleportclient.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "CameraMixin",
+    "GuiMixin",
+    "KeyboardInputMixin",
+    "MouseMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

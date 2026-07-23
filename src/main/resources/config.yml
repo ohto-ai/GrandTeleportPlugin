@@ -1,0 +1,124 @@
+# ============================================================================
+# GrandTeleportPlugin Configuration
+# ============================================================================
+
+# Master enable/disable switch for all teleport effects
+enabled: true
+
+# ----------------------------------------------------------------------------
+# Client Mod settings
+# ----------------------------------------------------------------------------
+mod:
+  # Whether to support the optional client-side Fabric mod
+  enabled: true
+  # Plugin channel name (must match the client mod)
+  channel: "grandteleport:camera"
+  # Handshake timeout in ticks — players who don't respond within this are treated as no-mod
+  handshake_timeout_ticks: 60
+# ----------------------------------------------------------------------------
+# Commands to intercept
+# Each entry has: pattern (Java regex), type (coordinates | passthrough), enabled
+#
+# Type "coordinates": plugin parses destination from the command, creates full camera path
+# Type "passthrough": plugin wraps the command with effects, dispatches to target plugin
+# ----------------------------------------------------------------------------
+commands:
+  # --- Coordinates type: full camera animation ---
+  - pattern: "^/(?:minecraft:)?(?:teleport|tp)\\s+.*"
+    type: coordinates
+    enabled: true
+
+  # --- Passthrough type: effect wrapper → dispatch to target plugin ---
+  - pattern: "^/(?:essentials:)?tpa(?:ccept|deny|here|ll)?\\b.*"
+    type: passthrough
+    enabled: true
+  - pattern: "^/tpask\\b.*"
+    type: passthrough
+    enabled: true
+  - pattern: "^/tpayes\\b.*"
+    type: passthrough
+    enabled: true
+  - pattern: "^/tpano\\b.*"
+    type: passthrough
+    enabled: true
+  - pattern: "^/res\\s+tp\\s+.*"
+    type: passthrough
+    enabled: true
+  - pattern: "^/warp\\s+.*"
+    type: passthrough
+    enabled: true
+  - pattern: "^/home\\s*.*"
+    type: passthrough
+    enabled: true
+  - pattern: "^/spawn\\s*.*"
+    type: passthrough
+    enabled: true
+  - pattern: "^/back\\s*.*"
+    type: passthrough
+    enabled: true
+
+# ----------------------------------------------------------------------------
+# Camera animation parameters (shared by mod and armor-stand fallback)
+# ----------------------------------------------------------------------------
+camera:
+  # How high the camera rises above ground during the transition
+  peak_altitude: 100
+  # Duration of each phase in ticks (20 ticks = 1 second)
+  pull_ticks: 20
+  hold_ticks: 10
+  travel_ticks: 30
+  push_ticks: 20
+
+# ----------------------------------------------------------------------------
+# Passthrough transition (for commands where we don't know the destination)
+# ----------------------------------------------------------------------------
+passthrough:
+  # Brief delay in ticks before re-dispatching the command
+  delay_ticks: 30
+
+# ----------------------------------------------------------------------------
+# Sound effects
+# ----------------------------------------------------------------------------
+sounds:
+  enabled: true
+  # Played at each altitude step transition
+  step: "BLOCK_RESPAWN_ANCHOR_CHARGE"
+  step_volume: 0.7
+  step_pitch: 0.8
+  # Played during the horizontal travel phase
+  travel: "BLOCK_PORTAL_TRIGGER"
+  travel_volume: 0.6
+  travel_pitch: 0.5
+  # Played when the player arrives
+  arrive: "ENTITY_ENDERMAN_TELEPORT"
+  arrive_volume: 0.8
+  arrive_pitch: 1.2
+
+# ----------------------------------------------------------------------------
+# Particle effects along the camera path
+# ----------------------------------------------------------------------------
+particles:
+  enabled: true
+  type: "PORTAL"
+  count: 20
+  spread: 1.5
+
+# ----------------------------------------------------------------------------
+# Title screen effects
+# ----------------------------------------------------------------------------
+titles:
+  enabled: true
+  fade_in_ticks: 5
+  stay_ticks: 10
+  fade_out_ticks: 10
+  teleporting_text: "&bTeleporting..."
+  arriving_text: "&aArrived!"
+
+# ----------------------------------------------------------------------------
+# Player freezing during transition
+# ----------------------------------------------------------------------------
+freeze:
+  enabled: true
+  block_movement: true
+  block_damage: true
+  block_interact: true
